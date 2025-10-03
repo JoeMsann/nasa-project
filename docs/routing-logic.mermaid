@@ -1,0 +1,24 @@
+flowchart TD
+    Input["User Input Query"] --> Router{"Routing Logic<br>Analysis"}
+    Router --> KeywordCheck["Check Keywords"] & IntentAnalysis["Intent Analysis"] & DataPresence["Data Vector Present?"]
+    KeywordCheck -- Contains exoplanet terms --> ExoPath["Route to Exoplanet"]
+    KeywordCheck -- General questions --> ConvoPath["Route to Conversation"]
+    IntentAnalysis -- Data analysis intent --> ExoPath
+    IntentAnalysis -- Educational/chat intent --> ConvoPath
+    DataPresence -- input_vector exists --> ExoPath
+    DataPresence -- No data vector --> ConvoPath
+    ExoPath --> ExoplanetNode["Exoplanet Detection Node"]
+    ConvoPath --> ConversationNode["Conversation Node"]
+
+     Router:::process
+     KeywordCheck:::process
+     IntentAnalysis:::process
+     DataPresence:::process
+     ExoplanetNode:::implemented
+     ConversationNode:::implemented
+    classDef unimplemented fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+    classDef implemented fill:#d4edda,stroke:#28a745,stroke-width:2px
+    classDef process fill:#fff3cd,stroke:#856404,stroke-width:2px
+    classDef model fill:#e2e3e5,stroke:#6c757d,stroke-width:2px
+
+
