@@ -13,3 +13,5 @@ include/
 libs/
 *.exe
 *.pdb
+src/__pycache__/
+src/.langgraph_api/

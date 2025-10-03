@@ -17,19 +17,27 @@ class Config:
         self.hf_token: str = os.getenv("HF_TOKEN")
         
         # Initialize models
+        # Routing - GPT OSS 20b
+        self.routing_model = ChatGroq(
+            model="openai/gpt-oss-20b",
+            api_key=self.groq_api_key
+        )
+
         # Exoplanet Detection Model
         self.exoplanet_detection_model = Client("chadiawar977/Nasa_space" , self.hf_token)
 
-        # Kimi K2 Instruct
+        # Conversation - Kimi K2 Instruct
         self.conversation_model = ChatGroq(
             model="moonshotai/kimi-k2-instruct-0905",
             temperature=1,
             api_key=self.groq_api_key
         )
-        # GPT OSS 120B
+       
+        # Reasoning - GPT OSS 120b
         self.reasoning_model = ChatGroq(
             model="openai/gpt-oss-120b",
             temperature=0,
             api_key=self.groq_api_key
         )
+
 app_config = Config()
