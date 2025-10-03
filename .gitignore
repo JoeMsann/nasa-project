@@ -1,0 +1,15 @@
+*.dll
+Lib/
+Library/
+Scripts/
+DLLs/ 
+conda-meta/
+.env
+Scripts/
+share/ 
+etc/ 
+Tools/
+include/
+libs/
+*.exe
+*.pdb
