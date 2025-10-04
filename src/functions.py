@@ -15,9 +15,9 @@ def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str
         - If failed: (None, error description)
     """
     try:
-        # Extract all numbers (including decimals) from the input string
-        # This regex matches integers and floats (e.g., 1, 1.0, 0.5, .5)
-        number_pattern = r'-?\d*\.?\d+'
+        # Extract all numbers (including decimals and scientific notation) from the input string
+        # This regex matches integers, floats, and scientific notation (e.g., 1, 1.0, 0.5, .5, 2.45e+06, 2.23e-02)
+        number_pattern = r'-?\d*\.?\d+(?:[eE][+-]?\d+)?'
         matches = re.findall(number_pattern, input_string)
         
         if not matches:
