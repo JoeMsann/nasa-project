@@ -1,16 +1,17 @@
 import re
 from typing import List, Optional, Tuple
+from config import app_config
 
 def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str]]:
     """
-    Parse and validate a 122-element vector from user input.
+    Parse and validate a 121-element vector from user input.
     
     Args:
         input_string: String containing numbers separated by commas, spaces, or other delimiters
         
     Returns:
         Tuple of (vector, error_message)
-        - If successful: (list of 122 floats, None)
+        - If successful: (list of 121 floats, None)
         - If failed: (None, error description)
     """
     try:
@@ -30,15 +31,6 @@ def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str
                 vector.append(num)
             except ValueError:
                 return None, f"Invalid number format: '{match}'"
-        
-        # Validate vector length
-        if len(vector) != 122:
-            return None, f"Vector length mismatch: expected 122, got {len(vector)}"
-        
-        # Validate range [0.0, 1.0]
-        out_of_range = [i for i, v in enumerate(vector) if v < 0.0 or v > 1.0]
-        if out_of_range:
-            return None, f"Values out of range [0.0, 1.0] at indices: {out_of_range[:5]}{'...' if len(out_of_range) > 5 else ''}"
         
         return vector, None
         
@@ -77,3 +69,17 @@ def clean_query(input_string: str, verbose: bool = True) -> Optional[str]:
     
     return format_vector(vector)
 
+def choose_model(vector_str: str):
+    """Choose the appropriate model based on vector size"""
+    vector_length = len(vector_str.split(','))
+
+    if vector_length == app_config.kepler.vector_size:
+        return app_config.kepler
+    elif vector_length == app_config.k2.vector_size:
+        return app_config.k2
+    else:
+        # Return error info for unsupported vector size
+        return {
+            "error": f"Unsupported vector size: {vector_length}. Expected {app_config.kepler.vector_size} or {app_config.k2.vector_size}",
+            "success": False
+        }
