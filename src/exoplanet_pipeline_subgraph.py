@@ -2,6 +2,7 @@ from typing import TypedDict
 from config import app_config
 from langgraph.graph import StateGraph, START, END
 from functions import clean_query
+from prompts import JSON_TRANSCRIBER_PROMPT
 import pandas as pd
 import io
 
@@ -61,17 +62,17 @@ def exoplanet_detection_node(state: State) -> State:
 
 # JSON transcription node
 def json_transcription_node(state: State) -> State:
-    """Convert JSON results to human-readable text"""
+    """Convert JSON results to human-readable text using the JSON transcriber agent"""
     json_list = state["output_json_list"]
-    
-    # Example transcription
-    total = len(json_list)
-    exoplanets = sum(1 for j in json_list if j.get("is_exoplanet"))
-    
-    response = f"Analyzed {total} vectors. Found {exoplanets} potential exoplanets."
-    
+
+    # Use the JSON transcriber agent with the proper prompt
+    response = json_transcriber_agent.invoke([
+        JSON_TRANSCRIBER_PROMPT,
+        {"role": "user", "content": str(json_list)}
+    ])
+
     return {
-        "transcribed_response": response
+        "transcribed_response": response.content
     }
 
 # Graph Builder

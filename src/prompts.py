@@ -1,5 +1,5 @@
 # JSON Transcriber
-json_transcriber_prompt = {
+JSON_TRANSCRIBER_PROMPT = {
     "role": "system",
     "content": """You are an astronomical data analyst aboard a deep space observatory, transcribing exoplanet detection results from stellar observations into mission reports.
 
