@@ -34,7 +34,7 @@ def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str
         # Validate vector length
         if len(vector) != 121:
             return None, f"Vector length mismatch: expected 121, got {len(vector)}"
-        
+
         # Validate range [0.0, 1.0]
         out_of_range = [i for i, v in enumerate(vector) if v < 0.0 or v > 1.0]
         if out_of_range:

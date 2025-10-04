@@ -8,7 +8,8 @@ import io
 
 # Initializing models
 vector_parser = app_config.reasoning_model
-exoplanet_detector = app_config.exoplanet_detection_model
+kepler = app_config.kepler
+kepler = app_config.kepler
 json_transcriber_agent = app_config.reasoning_model
 
 # Pipeline State
@@ -42,6 +43,21 @@ def parse_vectors_node(state: State) -> State:
         "vector_list": vector_list
     }
 
+def choose_model(vector_str: str):
+    """Choose the appropriate model based on vector size"""
+    vector_length = len(vector_str.split(','))
+
+    if vector_length == app_config.kepler.vector_size:
+        return app_config.kepler
+    elif vector_length == app_config.k2.vector_size:
+        return app_config.k2
+    else:
+        # Return error info for unsupported vector size
+        return {
+            "error": f"Unsupported vector size: {vector_length}. Expected {app_config.kepler.vector_size} or {app_config.k2.vector_size}",
+            "success": False
+        }
+
 # Exoplanet Detection node
 def exoplanet_detection_node(state: State) -> State:
     """Handle exoplanet detection for each vector"""
@@ -50,7 +66,14 @@ def exoplanet_detection_node(state: State) -> State:
     output_json_list = []
 
     for vector_str in vector_list:
-        result = exoplanet_detector.predict(
+        model = choose_model(vector_str)
+
+        # Check if model selection returned an error
+        if isinstance(model, dict) and "error" in model:
+            output_json_list.append(model)
+            continue
+
+        result = model.client.predict(
             input_vector=vector_str,
             api_name="/predict"
         )
