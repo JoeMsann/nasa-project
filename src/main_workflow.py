@@ -4,7 +4,6 @@ from langgraph.graph import StateGraph, START, END
 from typing_extensions import Annotated, TypedDict
 from langchain_core.prompts import ChatPromptTemplate
 from exoplanet_pipeline_subgraph import exoplanet_pipeline
-from functions import clean_query
 
 # Initializing models
 router = app_config.routing_model
@@ -81,10 +80,12 @@ workflow_builder.add_conditional_edges(
 workflow_builder.add_edge("exoplanet_detection", END)
 workflow_builder.add_edge("conversation", END)
 
+main_workflow = workflow_builder.compile()
+
 # Compiled Graph
-from langgraph.checkpoint.memory import MemorySaver
-memory = MemorySaver()
-main_workflow = workflow_builder.compile(checkpointer=memory)
+# from langgraph.checkpoint.memory import MemorySaver
+# memory = MemorySaver()
+# main_workflow = workflow_builder.compile(checkpointer=memory)
 
 # # Invoke with thread_id for persistence
 # config = {"configurable": {"thread_id": "user-123"}}
