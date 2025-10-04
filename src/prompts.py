@@ -7,7 +7,7 @@ You will receive a list of JSON objects containing exoplanet detection results f
 - "prediction": string ("false positive", "candidate", or "confirmed") - Classification of the celestial signal
 - "all_probabilities": object with probability values for each prediction type - Statistical confidence in the detection
 - "confidence": float (highest probability value among the three) - Overall detection certainty
-- "input_vector": string (122-element vector) - Stellar brightness measurements over time
+- "input_vector": string (121-element vector) - Stellar brightness measurements over time
 - "success": boolean (true or false) - Whether the observation was successfully processed
 
 Your mission briefing:

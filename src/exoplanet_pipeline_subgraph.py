@@ -15,7 +15,7 @@ json_transcriber_agent = app_config.reasoning_model
 class State(TypedDict):
     user_input: str # Raw user input
     attached_table: str | None # Optional uploaded table containing vectors
-    vector_list: list[str] # list of 122-vectors as strings
+    vector_list: list[str] # list of 121-vectors as strings
     output_json_list: list[dict] # list of JSON outputs for each input vector
     transcribed_response: str # Final human-readable response
 
