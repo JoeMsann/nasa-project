@@ -1,0 +1,54 @@
+  graph TD
+      %% Entry Point
+      START([START]) --> routing[Routing Node]
+
+      %% Decision Logic
+      routing --> routing_logic{Routing Logic}
+
+      %% Two Main Paths
+      routing_logic -->|General Questions| conversation[Conversation Node]
+      routing_logic -->|Exoplanet Analysis| exoplanet[Exoplanet Detection Node]
+
+      %% Exoplanet Processing Pipeline
+      exoplanet --> json_transcriber[JSON Transcription Node]
+      json_transcriber --> END1([END])
+
+      %% Conversation End
+      conversation --> END2([END])
+
+%%      %% State Management
+%%      subgraph States["State Classes"]
+%%          MainState["MainWorkflowState<br/>• input_query: str<br/>• input_vector: str<br/>• response: str"]
+%%          PrivateState["PrivateWorkflowState<br/>• input_vector: str<br/>• output_json: json"]
+%%      end
+%%
+%%      %% Models/Agents
+%%      subgraph Models["AI Models"]
+%%          Router["Router Model<br/>(GPT OSS 20B)"]
+%%          Conversation["Conversation Model<br/>(Kimi K2 Instruct)"]
+%%          ExoDetector["Exoplanet Detector<br/>(Custom HF Model)"]
+%%          Reasoning["Reasoning Model<br/>(GPT OSS 120B)"]
+%%      end
+%%
+%%      %% File Structure
+%%      subgraph Files["Project Files"]
+%%          Config["config.py<br/>• API configurations<br/>• Model initialization"]
+%%          MainWorkflow["main_workflow.py<br/>• LangGraph definition<br/>• Node functions (empty)"]
+%%          Prompts["prompts.py<br/>(empty)"]
+%%          LangGraphJSON["langgraph.json<br/>• Deployment config<br/>• Environment setup"]
+%%      end
+%%
+%%      %% Implementation Status
+%%      subgraph Status["Implementation Status"]
+%%          Implemented["✅ Framework Setup<br/>✅ Model Configuration<br/>✅ Graph Structure"]
+%%          Missing["❌ Node Logic<br/>❌ Prompt Templates<br/>❌ Business Logic"]
+%%      end
+
+      %% Styling
+      classDef implemented fill:#d4edda,stroke:#28a745,stroke-width:2px
+      classDef missing fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+      classDef config fill:#e2e3e5,stroke:#6c757d,stroke-width:2px
+
+      class START,routing,conversation,exoplanet,json_transcriber,END1,END2 implemented
+      class routing_logic missing
+      class Config,MainWorkflow,LangGraphJSON config
