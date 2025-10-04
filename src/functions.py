@@ -1,7 +1,6 @@
 import re
 from typing import List, Optional, Tuple
 
-
 def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str]]:
     """
     Parse and validate a 122-element vector from user input.
@@ -46,7 +45,6 @@ def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str
     except Exception as e:
         return None, f"Unexpected error during parsing: {str(e)}"
 
-
 def format_vector(vector: List[float]) -> str:
     """
     Format a vector into the standard string format.
@@ -58,7 +56,6 @@ def format_vector(vector: List[float]) -> str:
         Comma-separated string representation
     """
     return ", ".join(str(v) for v in vector)
-
 
 def clean_query(input_string: str, verbose: bool = True) -> Optional[str]:
     """
@@ -79,3 +76,4 @@ def clean_query(input_string: str, verbose: bool = True) -> Optional[str]:
         return None
     
     return format_vector(vector)
+
