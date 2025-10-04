@@ -2,6 +2,8 @@ from typing import TypedDict
 from config import app_config
 from langgraph.graph import StateGraph, START, END
 from functions import clean_query
+import pandas as pd
+import io
 
 # Initializing models
 vector_parser = app_config.reasoning_model
@@ -13,15 +15,12 @@ class State(TypedDict):
     user_input: str # Raw user input
     attached_table: str | None # Optional uploaded table containing vectors
     vector_list: list[str] # list of 122-vectors as strings
-    output_json: list[dict] # list of JSON outputs for each input vector
+    output_json_list: list[dict] # list of JSON outputs for each input vector
     transcribed_response: str # Final human-readable response
 
 # Vector Parsing node
 def parse_vectors_node(state: State) -> State:
-    """Parse CSV string into list of vector strings"""
-    import pandas as pd
-    import io
-    
+    """Parse CSV string into list of vector strings"""   
     vector_list = []
     
     # 1. Parse CSV if it exists
