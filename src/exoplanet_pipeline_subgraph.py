@@ -1,7 +1,7 @@
 from typing import TypedDict
 from config import app_config
 from langgraph.graph import StateGraph, START, END
-from functions import clean_query
+from functions import clean_query, choose_model
 from prompts import JSON_TRANSCRIBER_PROMPT
 import pandas as pd
 import io
@@ -26,7 +26,8 @@ def parse_vectors_node(state: State) -> State:
     vector_list = []
     
     # 1. Parse CSV if it exists
-    csv_content = state.get("attached_table")
+    csv_content = state.get("attached_table", "")
+    print(f"CSV Content: {csv_content}")
     if csv_content:
         df = pd.read_csv(io.StringIO(csv_content))
         csv_vectors = [",".join(map(str, row)) for row in df.values]
@@ -34,6 +35,7 @@ def parse_vectors_node(state: State) -> State:
 
     # 2. Parse vector from user input
     user_input = state.get("user_input", "")
+    print(f"User Input: {user_input}")
     if user_input:
         parsed_vector = clean_query(user_input)
         if parsed_vector:
@@ -42,21 +44,6 @@ def parse_vectors_node(state: State) -> State:
     return {
         "vector_list": vector_list
     }
-
-def choose_model(vector_str: str):
-    """Choose the appropriate model based on vector size"""
-    vector_length = len(vector_str.split(','))
-
-    if vector_length == app_config.kepler.vector_size:
-        return app_config.kepler
-    elif vector_length == app_config.k2.vector_size:
-        return app_config.k2
-    else:
-        # Return error info for unsupported vector size
-        return {
-            "error": f"Unsupported vector size: {vector_length}. Expected {app_config.kepler.vector_size} or {app_config.k2.vector_size}",
-            "success": False
-        }
 
 # Exoplanet Detection node
 def exoplanet_detection_node(state: State) -> State:
@@ -114,3 +101,14 @@ exoplanet_pipeline_builder.add_edge("json_to_text", END)
 
 # Compiled Graph
 exoplanet_pipeline = exoplanet_pipeline_builder.compile()
+
+# initial_state = {
+#     "user_input": "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
+#     "attached_table": None,
+#     "vector_list": [],
+#     "output_json_list": [],
+#     "transcribed_response": ""
+# }
+
+# result = exoplanet_pipeline.invoke(initial_state)
+# print(result)
