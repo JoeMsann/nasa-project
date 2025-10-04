@@ -15,4 +15,3 @@ libs/
 *.pdb
 src/__pycache__/
 src/.langgraph_api/
-.idea/
