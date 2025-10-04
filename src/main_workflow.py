@@ -57,7 +57,34 @@ def exoplanet_pipeline_node(state: MainWorkflowState) -> MainWorkflowState:
 
 # Router node
 def routing_logic(state: MainWorkflowState) -> str:
-    pass
+    """Determine which pathway to take based on input"""
+    from functions import parse_vector
+    import pandas as pd
+    import io
+
+    user_input = state.get("user_input", "")
+    attached_table = state.get("attached_table")
+
+    # Check if there's vector data (either in input or CSV)
+    has_vector_data = False
+
+    # Check for CSV data
+    if attached_table:
+        try:
+            df = pd.read_csv(io.StringIO(attached_table))
+            if len(df.columns) == 122:  # Check if it looks like vector data
+                has_vector_data = True
+        except:
+            pass
+
+    # Check for vector in user input
+    if user_input:
+        vector, error = parse_vector(user_input)
+        if vector is not None:
+            has_vector_data = True
+
+    # Return routing decision
+    return "exoplanet_detection" if has_vector_data else "conversation"
 
 # Graph Builder
 workflow_builder = StateGraph(MainWorkflowState)
