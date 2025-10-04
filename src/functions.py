@@ -3,14 +3,14 @@ from typing import List, Optional, Tuple
 
 def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str]]:
     """
-    Parse and validate a 122-element vector from user input.
+    Parse and validate a 121-element vector from user input.
     
     Args:
         input_string: String containing numbers separated by commas, spaces, or other delimiters
         
     Returns:
         Tuple of (vector, error_message)
-        - If successful: (list of 122 floats, None)
+        - If successful: (list of 121 floats, None)
         - If failed: (None, error description)
     """
     try:
@@ -32,8 +32,8 @@ def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str
                 return None, f"Invalid number format: '{match}'"
         
         # Validate vector length
-        if len(vector) != 122:
-            return None, f"Vector length mismatch: expected 122, got {len(vector)}"
+        if len(vector) != 121:
+            return None, f"Vector length mismatch: expected 121, got {len(vector)}"
         
         # Validate range [0.0, 1.0]
         out_of_range = [i for i, v in enumerate(vector) if v < 0.0 or v > 1.0]

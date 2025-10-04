@@ -4,12 +4,12 @@ from typing import List, Optional, Tuple
 
 def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str]]:
     """
-    Parse and validate a 122-element vector from user input.    
+    Parse and validate a 121-element vector from user input.    
     Args:
         input_string: String containing numbers separated by commas, spaces, or other delimiters        
     Returns:
         Tuple of (vector, error_message)
-        - If successful: (list of 122 floats, None)
+        - If successful: (list of 121 floats, None)
         - If failed: (None, error description)
     """
     try:
@@ -31,8 +31,8 @@ def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str
                 return None, f"Invalid number format: '{match}'"
         
         # Validate vector length
-        if len(vector) != 122:
-            return None, f"Vector length mismatch: expected 122, got {len(vector)}"
+        if len(vector) != 121:
+            return None, f"Vector length mismatch: expected 121, got {len(vector)}"
         
         # Validate range [0.0, 1.0]
         out_of_range = [i for i, v in enumerate(vector) if v < 0.0 or v > 1.0]
@@ -78,7 +78,7 @@ def clean_vector(input_string: str, verbose: bool = True) -> Optional[str]:
 # Example usage
 if __name__ == "__main__":
     # Test with correct input
-    input_v = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
+    input_v = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
     
     print("Test 1: Valid input")
     result = clean_vector(input_v)
@@ -97,14 +97,14 @@ if __name__ == "__main__":
     
     # Test with values out of range
     print("Test 3: Values out of range")
-    out_of_range = ", ".join(["1.5"] * 122)
+    out_of_range = ", ".join(["1.5"] * 121)
     clean_vector(out_of_range)
     
     print("\n" + "="*50 + "\n")
     
     # Test with mixed valid/invalid characters
     print("Test 4: Mixed input with text")
-    mixed = "Here are my values: " + ", ".join(["0.5"] * 122) + " end"
+    mixed = "Here are my values: " + ", ".join(["0.5"] * 121) + " end"
     result = clean_vector(mixed)
     if result:
         print("Successfully extracted vector from noisy input!")
