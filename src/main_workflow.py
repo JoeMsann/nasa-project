@@ -33,7 +33,7 @@ class MainWorkflowState(TypedDict):
     attached_table: str | None # Optional uploaded table containing vectors
     response: str # Final response to user
     routing_decision: bool # True for exoplanet pipeline, False for conversation
-    output_json_list: list[dict] | None
+    output_json: list[dict] | None
 
 # Nodes logic
 def routing_node(state: MainWorkflowState) -> MainWorkflowState:
@@ -50,7 +50,7 @@ def routing_node(state: MainWorkflowState) -> MainWorkflowState:
 
     # Convert routing decision to boolean
     decision_text = routing_decision.content.strip().lower()
-    is_exoplanet = any(keyword in decision_text for keyword in ["exoplanet", "detection", "predict"]) and state.get("attached_table") is not None
+    is_exoplanet = any(keyword in decision_text for keyword in ["exoplanet", "detection", "predict"]) or state.get("attached_table") is not None
 
     # Add current user input to messages
     return {
@@ -86,7 +86,8 @@ def exoplanet_pipeline_node(state: MainWorkflowState) -> MainWorkflowState:
         "attached_table": state.get("attached_table"),  # Pass through (safe access)
         "vector_list": [],  # Will be populated by parse_vectors_node
         "output_json_list": [], # Will be populated by exoplanet_detection_node
-        "transcribed_response": None  # Will be populated by json_transcription_node
+        "transcribed_response": None,  # Will be populated by json_transcription_node
+        "json_final_output": None  # Will be populated by json_output_node
     }
     
     # Run the pipeline
@@ -96,7 +97,7 @@ def exoplanet_pipeline_node(state: MainWorkflowState) -> MainWorkflowState:
     return {
         "messages": [AIMessage(content=pipeline_result["transcribed_response"])],
         "response": pipeline_result["transcribed_response"],
-        "output_json_list": pipeline_result["output_json_list"]
+        "output_json": pipeline_result["json_final_output"]
     }
 
 # Router node

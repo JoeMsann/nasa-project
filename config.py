@@ -34,6 +34,13 @@ class Config:
             self.hf_token,
         )
 
+        self.text_to_json_model = ChatGroq(
+            model="qwen/qwen3-32b",
+            temperature=0,
+            api_key=self.groq_api_key,
+            response_format={"type": "json_object"},
+        )
+
         # Conversation - Kimi K2 Instruct
         self.conversation_model = ChatGroq(
             model="moonshotai/kimi-k2-instruct-0905",
