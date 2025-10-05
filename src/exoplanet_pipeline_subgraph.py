@@ -1,15 +1,20 @@
+from itertools import chain
 from typing import TypedDict
 from config import app_config
 from langgraph.graph import StateGraph, START, END
 from functions import clean, choose_model_api
-from prompts import JSON_TRANSCRIBER_PROMPT
-import pandas as pd
-import io
+from prompts import *
+from langchain_core.prompts import ChatPromptTemplate
 
 # Initializing models
 vector_parser = app_config.reasoning_model
 exoplanet_model = app_config.exoplanet_model
 json_transcriber_agent = app_config.reasoning_model
+json_output_model = app_config.reasoning_model
+json_output_prompt = ChatPromptTemplate.from_messages([
+    ("system", JSON_OUTPUT_PROMPT),
+    ("user", "{transcribed_response}")
+])
 
 # Pipeline State
 class State(TypedDict):
@@ -18,6 +23,7 @@ class State(TypedDict):
     vector_list: list[str] # list of 121-vectors as strings
     output_json_list: list[dict] # list of JSON outputs for each input vector
     transcribed_response: str # Final human-readable response
+    json_final_output: dict # Final raw JSON output as string
 
 # Vector Parsing node
 def parse_vectors_node(state: State) -> State:
@@ -88,6 +94,16 @@ def json_transcription_node(state: State) -> State:
         "transcribed_response": response.content
     }
 
+def json_output_node(state: State) -> State:
+    """Output the raw JSON results"""
+    transcribed_text = state["transcribed_response"]
+    chain = json_output_prompt | json_output_model
+    result = chain.invoke({"transcribed_response": transcribed_text})
+    
+    return {
+        "json_final_output": result.content
+    }
+
 # Graph Builder
 exoplanet_pipeline_builder = StateGraph(State)
 
@@ -95,12 +111,14 @@ exoplanet_pipeline_builder = StateGraph(State)
 exoplanet_pipeline_builder.add_node("vector_parsing", parse_vectors_node)
 exoplanet_pipeline_builder.add_node("exoplanet_detection", exoplanet_detection_node)
 exoplanet_pipeline_builder.add_node("json_to_text", json_transcription_node)
+exoplanet_pipeline_builder.add_node("json_output", json_output_node)
 
 # Edges
 exoplanet_pipeline_builder.add_edge(START, "vector_parsing")
 exoplanet_pipeline_builder.add_edge("vector_parsing", "exoplanet_detection")
 exoplanet_pipeline_builder.add_edge("exoplanet_detection", "json_to_text")
-exoplanet_pipeline_builder.add_edge("json_to_text", END)
+exoplanet_pipeline_builder.add_edge("json_to_text", "json_output")
+exoplanet_pipeline_builder.add_edge("json_output", END)
 
 # Compiled Graph
 exoplanet_pipeline = exoplanet_pipeline_builder.compile()
