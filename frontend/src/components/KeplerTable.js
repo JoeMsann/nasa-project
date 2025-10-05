@@ -193,32 +193,22 @@ function KeplerTable() {
       setLoading(true);
       const result = await fetchKeplerPaginated(page, size);
 
-      console.log('=== KEPLER TABLE DATA DEBUG ===');
-      console.log('Raw result:', result);
-
       // The API function returns result.data, which is an array: [{ success: true, pagination: {...}, data: [...] }]
       if (result && Array.isArray(result) && result.length > 0) {
         const apiResponse = result[0];
 
         if (apiResponse.success && apiResponse.data && Array.isArray(apiResponse.data)) {
-          console.log('Found Kepler data:', apiResponse.data.length, 'records');
-          console.log('Pagination info:', apiResponse.pagination);
-
           setData(apiResponse.data);
           setTotalPages(apiResponse.pagination.total_pages || 1);
         } else {
-          console.log('API response indicates failure or no data');
           setData([]);
           setTotalPages(1);
         }
       } else {
-        console.log('Unexpected data structure from API');
         setData([]);
         setTotalPages(1);
       }
-      console.log('================================');
     } catch (err) {
-      console.error('Error in fetchData:', err);
       setError(err.message);
     } finally {
       setLoading(false);

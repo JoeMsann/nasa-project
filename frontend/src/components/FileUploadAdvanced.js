@@ -80,7 +80,7 @@ const FilePreview = styled(motion.div)`
 
 const FileHeader = styled.div`
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 `;
@@ -232,7 +232,6 @@ const FileUploadAdvanced = () => {
     try {
       const response = await uploadAndAnalyzeCsv(uploadedFile);
       // Handle success - maybe show results in a modal or navigate to results page
-      console.log('Analysis results:', response);
     } catch (error) {
       setError(error.message);
     } finally {

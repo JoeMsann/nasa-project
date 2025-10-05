@@ -602,18 +602,8 @@ const KeplerDetails = () => {
       try {
         setLoading(true);
         setError(null);
-        console.log('Loading Kepler data for ID:', keplerId);
 
         const result = await fetchKeplerById(keplerId);
-        console.log('Received result:', result);
-        console.log('Result type:', typeof result);
-        console.log('Result keys:', result ? Object.keys(result) : 'null');
-
-        // Log the structure we're getting
-        if (Array.isArray(result)) {
-          console.log('Result is array, length:', result.length);
-          console.log('First item:', result[0]);
-        }
 
         // Handle Gradio response - expecting array with one item
         let keplerData = null;
@@ -622,12 +612,10 @@ const KeplerDetails = () => {
         if (Array.isArray(result) && result.length > 0) {
           // Gradio returns an array with one item
           const firstItem = result[0];
-          console.log('First item from array:', firstItem);
 
           // Check for explicit failure
           if (firstItem && firstItem.success === false) {
             hasExplicitFailure = true;
-            console.log('API returned success: false');
           } else if (firstItem && firstItem.success && firstItem.data) {
             // Format: [{ success: true, kepler_id: ..., data: {...} }]
             keplerData = firstItem.data;
@@ -640,7 +628,6 @@ const KeplerDetails = () => {
           }
         } else if (result && result.success === false) {
           hasExplicitFailure = true;
-          console.log('API returned success: false');
         } else if (result && result.success && result.data) {
           // Format: { success: true, kepler_id: ..., data: {...} }
           keplerData = result.data;
@@ -652,25 +639,14 @@ const KeplerDetails = () => {
           keplerData = result;
         }
 
-        console.log('Final keplerData:', keplerData);
-        console.log('keplerData keys:', keplerData ? Object.keys(keplerData) : 'null');
-        console.log('Sample values:', {
-          orbitalPeriod: keplerData ? keplerData["Orbital_Period_(days)"] : 'missing',
-          planetRadius: keplerData ? keplerData["Planet_Radius_(Earth_radii)"] : 'missing',
-          temperature: keplerData ? keplerData["Equilibrium_Temperature_(K)"] : 'missing'
-        });
-
         if (keplerData) {
           setData(keplerData);
         } else if (hasExplicitFailure) {
-          // API explicitly returned success: false, don't show error
-          console.log('No data found for Kepler ID:', keplerId);
           setData(null);
         } else {
           setError('No valid data structure received from API');
         }
       } catch (err) {
-        console.error('Error in loadKeplerData:', err);
         setError(err.message);
       } finally {
         setLoading(false);
