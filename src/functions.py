@@ -1,5 +1,6 @@
 import re
 from typing import List, Optional, Tuple
+from config import app_config
 
 def parse_vector(input_string: str) -> Tuple[Optional[List[float]], Optional[str]]:
     """

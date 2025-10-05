@@ -14,5 +14,6 @@ libs/
 *.exe
 *.pdb
 src/__pycache__/
+*pyc
 src/.langgraph_api/
 .idea/
