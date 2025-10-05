@@ -32,7 +32,7 @@ class MainWorkflowState(TypedDict):
     user_input: str # Raw user input
     attached_table: str | None # Optional uploaded table containing vectors
     response: str # Final response to user
-    routing_decision: str # Routing classification
+    routing_decision: bool # True for exoplanet pipeline, False for conversation
 
 # Nodes logic
 def routing_node(state: MainWorkflowState) -> MainWorkflowState:
@@ -47,13 +47,14 @@ def routing_node(state: MainWorkflowState) -> MainWorkflowState:
         "user_input": state["user_input"]
     })
 
-    # Store routing decision in state for routing_logic to access
-    state["routing_decision"] = routing_decision.content.strip().lower()
+    # Convert routing decision to boolean
+    decision_text = routing_decision.content.strip().lower()
+    is_exoplanet = any(keyword in decision_text for keyword in ["exoplanet", "detection", "predict"])
 
     # Add current user input to messages
     return {
         "messages": [HumanMessage(content=state["user_input"])],
-        "routing_decision": state["routing_decision"]
+        "routing_decision": is_exoplanet
     }
 
 # Conversation node
@@ -98,15 +99,12 @@ def exoplanet_pipeline_node(state: MainWorkflowState) -> MainWorkflowState:
 
 # Router node
 def routing_logic(state: MainWorkflowState) -> str:
-    """Determine next node based on routing decision"""
-
-    routing_decision = state.get("routing_decision", "conversation")
-
-    # Map LLM output to graph edges
-    if "exoplanet" in routing_decision or "detection" in routing_decision or "predict" in routing_decision:
-        return "exoplanet_detection"
-    else:
-        return "conversation"
+    """Determine next node based on routing decision boolean"""
+    
+    routing_decision = state.get("routing_decision", False)
+    
+    # True -> exoplanet pipeline, False -> conversation
+    return "exoplanet_detection" if routing_decision else "conversation"
 
 # Graph Builder
 workflow_builder = StateGraph(MainWorkflowState)

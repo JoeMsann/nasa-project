@@ -49,7 +49,7 @@ def format_vector(vector: List[float]) -> str:
     """
     return ", ".join(str(v) for v in vector)
 
-def clean_query(input_string: str, verbose: bool = True) -> Optional[str]:
+def clean(input_string: str, verbose: bool = True) -> Optional[str]:
     """
     Main function to clean and validate vector input.
     
@@ -69,17 +69,17 @@ def clean_query(input_string: str, verbose: bool = True) -> Optional[str]:
     
     return format_vector(vector)
 
-def choose_model(vector_str: str):
+def choose_model_api(vector_str: str):
     """Choose the appropriate model based on vector size"""
     vector_length = len(vector_str.split(','))
 
-    if vector_length == app_config.kepler.vector_size:
-        return app_config.kepler
-    elif vector_length == app_config.k2.vector_size:
-        return app_config.k2
+    if vector_length == app_config.kepler_vector_size:
+        return app_config.kepler_api_name
+    elif vector_length == app_config.k2_vector_size:
+        return app_config.k2_api_name
     else:
         # Return error info for unsupported vector size
         return {
-            "error": f"Unsupported vector size: {vector_length}. Expected {app_config.kepler.vector_size} or {app_config.k2.vector_size}",
+            "error": f"Unsupported vector size: {vector_length}. Expected {app_config.kepler_vector_size} or {app_config.k2_vector_size}",
             "success": False
         }

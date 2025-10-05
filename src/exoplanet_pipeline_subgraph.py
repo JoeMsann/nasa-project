@@ -1,15 +1,14 @@
 from typing import TypedDict
 from config import app_config
 from langgraph.graph import StateGraph, START, END
-from functions import clean_query, choose_model
+from functions import clean, choose_model_api
 from prompts import JSON_TRANSCRIBER_PROMPT
 import pandas as pd
 import io
 
 # Initializing models
 vector_parser = app_config.reasoning_model
-kepler = app_config.kepler
-kepler = app_config.kepler
+exoplanet_model = app_config.exoplanet_model
 json_transcriber_agent = app_config.reasoning_model
 
 # Pipeline State
@@ -26,18 +25,22 @@ def parse_vectors_node(state: State) -> State:
     vector_list = []
     
     # 1. Parse CSV if it exists
-    csv_content = state.get("attached_table", "")
-    print(f"CSV Content: {csv_content}")
-    if csv_content:
-        df = pd.read_csv(io.StringIO(csv_content))
-        csv_vectors = [",".join(map(str, row)) for row in df.values]
-        vector_list.extend(csv_vectors)
+    attached_table = state.get("attached_table", "")
+    if attached_table:
+        # Split by newline and filter out empty lines
+        lines = [line.strip() for line in attached_table.split('\n') if line.strip()]
+        print(f"Number of vectors found in table: {len(lines)}")
+        
+        for line in lines:
+            # Each line should be a comma-separated string of numbers
+            if line:  # Skip empty lines
+                vector_list.append(clean(line))
 
     # 2. Parse vector from user input
     user_input = state.get("user_input", "")
     print(f"User Input: {user_input}")
     if user_input:
-        parsed_vector = clean_query(user_input)
+        parsed_vector = clean(user_input)
         if parsed_vector:
             vector_list.append(parsed_vector)
             
@@ -53,16 +56,16 @@ def exoplanet_detection_node(state: State) -> State:
     output_json_list = []
 
     for vector_str in vector_list:
-        model = choose_model(vector_str)
+        model_api = choose_model_api(vector_str)
 
         # Check if model selection returned an error
-        if isinstance(model, dict) and "error" in model:
-            output_json_list.append(model)
+        if isinstance(model_api, dict) and "error" in model_api:
+            output_json_list.append(model_api)
             continue
 
-        result = model.client.predict(
+        result = exoplanet_model.predict(
             input_vector=vector_str,
-            api_name="/predict"
+            api_name=model_api
         )
         output_json_list.append(result)
     
