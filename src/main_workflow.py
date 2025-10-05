@@ -5,7 +5,7 @@ from typing_extensions import Annotated, TypedDict
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
 from exoplanet_pipeline_subgraph import exoplanet_pipeline
-from prompts import *  
+from prompts import *
 
 # Initializing models
 router = app_config.routing_model
@@ -37,19 +37,19 @@ class MainWorkflowState(TypedDict):
 # Nodes logic
 def routing_node(state: MainWorkflowState) -> MainWorkflowState:
     """Classify user intent and determine routing path"""
-    
+
     # Get conversation history (excluding current input)
     messages = state.get("messages", [])
-    
+
     # Invoke router LLM with user input and history
     routing_decision = router_chain.invoke({
         "messages": messages,
         "user_input": state["user_input"]
     })
-    
+
     # Store routing decision in state for routing_logic to access
     state["routing_decision"] = routing_decision.content.strip().lower()
-    
+
     # Add current user input to messages
     return {
         "messages": [HumanMessage(content=state["user_input"])],
@@ -59,15 +59,15 @@ def routing_node(state: MainWorkflowState) -> MainWorkflowState:
 # Conversation node
 def conversation_node(state: MainWorkflowState) -> MainWorkflowState:
     """Handle conversational queries"""
-    
+
     # Get conversation history
     messages = state.get("messages", [])
-    
+
     response = conversation_chain.invoke({
         "messages": messages,
         "user_input": state["user_input"]
     })
-    
+
     # Add AI response to messages and set response
     return {
         "messages": [AIMessage(content=response.content)],
@@ -99,9 +99,9 @@ def exoplanet_pipeline_node(state: MainWorkflowState) -> MainWorkflowState:
 # Router node
 def routing_logic(state: MainWorkflowState) -> str:
     """Determine next node based on routing decision"""
-    
+
     routing_decision = state.get("routing_decision", "conversation")
-    
+
     # Map LLM output to graph edges
     if "exoplanet" in routing_decision or "detection" in routing_decision or "predict" in routing_decision:
         return "exoplanet_detection"

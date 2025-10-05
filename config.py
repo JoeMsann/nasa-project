@@ -1,4 +1,5 @@
 import os
+from dataclasses import dataclass
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from gradio_client import Client

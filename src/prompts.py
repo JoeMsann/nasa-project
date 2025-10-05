@@ -1,7 +1,3 @@
-"""
-System prompts for the Exoplanet Detection Application
-"""
-
 # JSON Transcriber
 JSON_TRANSCRIBER_PROMPT = {
     "role": "system",
