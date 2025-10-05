@@ -12,7 +12,7 @@ const api = axios.create({
 
 export const processMessage = async (userInput, csvData = null) => {
   try {
-    const response = await api.post('/chat', {
+    const response = await api.post('https://nasa-project-ec51.onrender.com/chat', {
       user_input: userInput,
       attached_table: csvData,
     });
@@ -34,7 +34,7 @@ export const processMessage = async (userInput, csvData = null) => {
 
 export const processSmartMessage = async (userInput, csvData = null) => {
   try {
-    const response = await api.post('/chat', {
+    const response = await api.post('https://nasa-project-ec51.onrender.com/chat', {
       user_input: userInput,
       attached_table: csvData,
     });
@@ -64,7 +64,7 @@ export const uploadAndAnalyzeCsv = async (file) => {
     const text = await file.text();
     const fileName = file.name;
 
-    const response = await api.post('/chat', {
+    const response = await api.post('https://nasa-project-ec51.onrender.com/chat', {
       user_input: `Analyze the uploaded CSV file: ${fileName}`,
       attached_table: text,
     });
