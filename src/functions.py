@@ -49,7 +49,7 @@ def format_vector(vector: List[float]) -> str:
     """
     return ", ".join(str(v) for v in vector)
 
-def clean_query(input_string: str, verbose: bool = True) -> Optional[str]:
+def clean(input_string: str, verbose: bool = True) -> Optional[str]:
     """
     Main function to clean and validate vector input.
     
