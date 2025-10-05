@@ -175,12 +175,6 @@ const Dashboard = () => {
       action: () => navigate('/analysis')
     },
     {
-      icon: Upload,
-      title: 'Batch Processing',
-      description: 'Upload CSV files containing multiple vectors for comprehensive batch analysis with detailed reports.',
-      action: () => setShowQuickAnalysis(true)
-    },
-    {
       icon: MessageCircle,
       title: 'AI Assistant',
       description: 'Ask questions about exoplanet detection methods and get expert explanations from our AI assistant.',
@@ -261,7 +255,6 @@ const Dashboard = () => {
       <QuickActionsSection>
         <SectionTitle>Quick Actions</SectionTitle>
         <QuickActions>
-          <FileUploadAdvanced />
           <QuickAnalysis />
         </QuickActions>
       </QuickActionsSection>
