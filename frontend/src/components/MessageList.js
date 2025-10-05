@@ -12,6 +12,8 @@ const MessageWrapper = styled.div`
   margin-bottom: 1rem;
   display: flex;
   justify-content: ${props => props.role === 'user' ? 'flex-end' : 'flex-start'};
+  min-width: 0;
+  width: 100%;
 `;
 
 const Message = styled.div`
@@ -28,6 +30,11 @@ const Message = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.2);
   white-space: pre-wrap;
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  min-width: 0;
+  box-sizing: border-box;
 `;
 
 const LoadingMessage = styled.div`

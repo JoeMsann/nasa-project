@@ -10,7 +10,7 @@ import {
   ThumbsUp,
   ThumbsDown,
 } from 'lucide-react';
-import { processMessage } from '../services/api';
+import { processSmartMessage } from '../services/api';
 
 // =================== Styled Components ===================
 
@@ -69,6 +69,8 @@ const MessageBubble = styled(motion.div)`
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
+  width: 100%;
+  min-width: 0;
   ${(props) =>
     props.isUser &&
     `
@@ -93,6 +95,8 @@ const Avatar = styled.div`
 
 const MessageContent = styled.div`
   max-width: 70%;
+  min-width: 0;
+  flex: 1;
   ${(props) => props.isUser && 'align-self: flex-end;'}
 `;
 
@@ -117,6 +121,11 @@ const MessageText = styled.div`
   line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  min-width: 0;
+  box-sizing: border-box;
 `;
 
 const MessageActions = styled.div`
@@ -255,22 +264,19 @@ const ChatInterfaceAdvanced = ({ onAnalysisComplete, initialVector }) => {
     setIsLoading(true);
 
     try {
-      const response = await processMessage(input.trim());
+      const result = await processSmartMessage(input.trim());
       const assistantMessage = {
         id: Date.now() + 1,
         role: 'assistant',
-        content: response,
+        content: result.response,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      if (
-        response.includes('exoplanet') ||
-        response.includes('detection') ||
-        response.includes('probability')
-      ) {
-        onAnalysisComplete?.(response);
+      // Only trigger analysis complete for actual exoplanet analysis
+      if (result.isExoplanetAnalysis) {
+        onAnalysisComplete?.(result.response);
       }
     } catch (error) {
       const errorMessage = {
