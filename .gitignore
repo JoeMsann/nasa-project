@@ -1,18 +1,89 @@
-*.dll
+# Environment variables and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.key
+*.pem
+secrets.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
 Lib/
 Library/
 Scripts/
-DLLs/ 
+DLLs/
 conda-meta/
-.env
-Scripts/
-share/ 
-etc/ 
+share/
+etc/
 Tools/
 include/
 libs/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Machine Learning
+*.pkl
+*.joblib
+models/
+checkpoints/
+logs/
+tensorboard/
+
+# OS generated files
+.DS_Store*
+ehthumbs.db
+Icon?
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# Application specific
+src/__pycache__/
+src/.langgraph_api/
 *.exe
 *.pdb
+*.dll
 __pycache__/
 *pyc
 .langgraph_api/
