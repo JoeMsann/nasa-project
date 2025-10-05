@@ -16,3 +16,5 @@ matplotlib
 seaborn
 tqdm
 scikit-learn
+streamlit
+gradio-client
