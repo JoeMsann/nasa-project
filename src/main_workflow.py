@@ -3,15 +3,25 @@ from config import app_config
 from langgraph.graph import StateGraph, START, END
 from typing_extensions import Annotated, TypedDict
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import HumanMessage, AIMessage
 from exoplanet_pipeline_subgraph import exoplanet_pipeline
+from prompts import *
 
 # Initializing models
 router = app_config.routing_model
 conversation_agent = app_config.conversation_model
 
 # Prompt Templates
+router_prompt = ChatPromptTemplate.from_messages([
+    ("system", ROUTER_PROMPT),
+    ("placeholder", "{messages}"),  # Include conversation history
+    ("user", "{user_input}")
+])
+router_chain = router_prompt | router
+
 conversation_prompt = ChatPromptTemplate.from_messages([
-    ("system", ""),
+    ("system", CONVERSATION_AGENT_PROMPT),
+    ("placeholder", "{messages}"),  # Include conversation history
     ("user", "{user_input}")
 ])
 conversation_chain = conversation_prompt | conversation_agent
@@ -22,17 +32,47 @@ class MainWorkflowState(TypedDict):
     user_input: str # Raw user input
     attached_table: str | None # Optional uploaded table containing vectors
     response: str # Final response to user
+    routing_decision: str # Routing classification
 
 # Nodes logic
 def routing_node(state: MainWorkflowState) -> MainWorkflowState:
-    pass
+    """Classify user intent and determine routing path"""
+
+    # Get conversation history (excluding current input)
+    messages = state.get("messages", [])
+
+    # Invoke router LLM with user input and history
+    routing_decision = router_chain.invoke({
+        "messages": messages,
+        "user_input": state["user_input"]
+    })
+
+    # Store routing decision in state for routing_logic to access
+    state["routing_decision"] = routing_decision.content.strip().lower()
+
+    # Add current user input to messages
+    return {
+        "messages": [HumanMessage(content=state["user_input"])],
+        "routing_decision": state["routing_decision"]
+    }
 
 # Conversation node
 def conversation_node(state: MainWorkflowState) -> MainWorkflowState:
-    """Handle conversational queries"""    
-    response = conversation_chain.invoke({"user_input": state["user_input"]})
-    state["response"] = response.content
-    return state
+    """Handle conversational queries"""
+
+    # Get conversation history
+    messages = state.get("messages", [])
+
+    response = conversation_chain.invoke({
+        "messages": messages,
+        "user_input": state["user_input"]
+    })
+
+    # Add AI response to messages and set response
+    return {
+        "messages": [AIMessage(content=response.content)],
+        "response": response.content
+    }
 
 # Exoplanet Detection Pipeline node
 def exoplanet_pipeline_node(state: MainWorkflowState) -> MainWorkflowState:
@@ -41,7 +81,7 @@ def exoplanet_pipeline_node(state: MainWorkflowState) -> MainWorkflowState:
     # Convert MainState → PipelineState
     pipeline_input = {
         "user_input": state["user_input"], # Pass through
-        "attached_table": state["attached_table"],  # Pass through
+        "attached_table": state.get("attached_table"),  # Pass through (safe access)
         "vector_list": [],  # Will be populated by parse_vectors_node
         "output_json_list": [], # Will be populated by exoplanet_detection_node
         "transcribed_response": None  # Will be populated by json_transcription_node
@@ -50,41 +90,23 @@ def exoplanet_pipeline_node(state: MainWorkflowState) -> MainWorkflowState:
     # Run the pipeline
     pipeline_result = exoplanet_pipeline.invoke(pipeline_input)
     
-    # Convert PipelineState → MainState
+    # Add AI response to messages and convert PipelineState → MainState
     return {
+        "messages": [AIMessage(content=pipeline_result["transcribed_response"])],
         "response": pipeline_result["transcribed_response"]
     }
 
 # Router node
 def routing_logic(state: MainWorkflowState) -> str:
-    """Determine which pathway to take based on input"""
-    from functions import parse_vector
-    import pandas as pd
-    import io
+    """Determine next node based on routing decision"""
 
-    user_input = state.get("user_input", "")
-    attached_table = state.get("attached_table")
+    routing_decision = state.get("routing_decision", "conversation")
 
-    # Check if there's vector data (either in input or CSV)
-    has_vector_data = False
-
-    # Check for CSV data
-    if attached_table:
-        try:
-            df = pd.read_csv(io.StringIO(attached_table))
-            if len(df.columns) == 122:  # Check if it looks like vector data
-                has_vector_data = True
-        except:
-            pass
-
-    # Check for vector in user input
-    if user_input:
-        vector, error = parse_vector(user_input)
-        if vector is not None:
-            has_vector_data = True
-
-    # Return routing decision
-    return "exoplanet_detection" if has_vector_data else "conversation"
+    # Map LLM output to graph edges
+    if "exoplanet" in routing_decision or "detection" in routing_decision or "predict" in routing_decision:
+        return "exoplanet_detection"
+    else:
+        return "conversation"
 
 # Graph Builder
 workflow_builder = StateGraph(MainWorkflowState)
@@ -109,7 +131,7 @@ workflow_builder.add_edge("conversation", END)
 
 main_workflow = workflow_builder.compile()
 
-# Compiled Graph
+# For persistent memory across sessions (uncomment to enable)
 # from langgraph.checkpoint.memory import MemorySaver
 # memory = MemorySaver()
 # main_workflow = workflow_builder.compile(checkpointer=memory)

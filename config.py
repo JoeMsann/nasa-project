@@ -1,7 +1,20 @@
 import os
+from dataclasses import dataclass
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from gradio_client import Client
+
+@dataclass
+class ExoplanetModelConfig:
+    """Configuration struct for exoplanet detection model"""
+    url: str
+    vector_size: int
+    client: Client = None
+
+    def __post_init__(self):
+        """Initialize the Gradio client after dataclass creation"""
+        if self.client is None:
+            self.client = Client(self.url)
 
 class Config:
     """
@@ -23,9 +36,15 @@ class Config:
             api_key=self.groq_api_key
         )
 
-        # Exoplanet Detection Model
-        self.exoplanet_detection_model = Client("chadiawar977/Nasa_space" , self.hf_token)
-
+        # kepler Detection Model
+        self.kepler = ExoplanetModelConfig(
+            url="chadiawar977/Nasa_space",
+            vector_size=122
+        )
+        self.k2 = ExoplanetModelConfig(
+            url="chadiawar977/Nasa_space",
+            vector_size=122
+        )
         # Conversation - Kimi K2 Instruct
         self.conversation_model = ChatGroq(
             model="moonshotai/kimi-k2-instruct-0905",
