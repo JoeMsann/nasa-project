@@ -126,13 +126,45 @@ const AlertText = styled.div`
 `;
 
 const ResultsVisualization = ({ data }) => {
-  // Parse the response to extract meaningful data
-  // This would need to be adapted based on your actual API response format
-  const parseAnalysisResults = (response) => {
-    // Mock data for demonstration - replace with actual parsing logic
-    const hasExoplanet = response.toLowerCase().includes('exoplanet detected') ||
-                        response.toLowerCase().includes('positive') ||
-                        Math.random() > 0.5; // Mock logic
+  // Parse the JSON output data from the MainWorkflowState
+  const parseAnalysisResults = (jsonData) => {
+    // Handle case where jsonData might be an array with a single object
+    let analysisData = jsonData;
+    if (Array.isArray(jsonData) && jsonData.length > 0) {
+      analysisData = jsonData[0];
+    }
+
+    // If we have output_json data, use it; otherwise fall back to parsing text response
+    if (analysisData && typeof analysisData === 'object' && analysisData.summary_metrics) {
+      const summaryMetrics = analysisData.summary_metrics;
+      const classificationResults = analysisData.classification_results || [];
+
+      // Calculate overall detection based on confirmed + candidates
+      const hasExoplanet = summaryMetrics.confirmed_exoplanets > 0 || summaryMetrics.planetary_candidates > 0;
+      const confidence = (summaryMetrics.average_classification_confidence * 100).toFixed(1);
+
+      // Create vector analysis from classification results
+      const vectorAnalysis = classificationResults.map((result, index) => ({
+        segment: result.system_index,
+        value: result.confidence * 100,
+        baseline: 50 + (result.probability_distribution.confirmed * 30)
+      }));
+
+      return {
+        detection: hasExoplanet ? 'Positive' : 'Negative',
+        confidence: confidence,
+        anomalyScore: (summaryMetrics.false_positives / summaryMetrics.total_systems_analyzed * 10).toFixed(2),
+        signalStrength: (summaryMetrics.analysis_success_rate * 100).toFixed(1),
+        hasExoplanet,
+        vectorAnalysis,
+        jsonData: analysisData // Store the full JSON data for detailed display
+      };
+    }
+
+    // Fallback to old text parsing logic
+    const hasExoplanet = data && (data.toLowerCase().includes('exoplanet detected') ||
+                        data.toLowerCase().includes('positive')) ||
+                        Math.random() > 0.5;
 
     const confidence = Math.random() * 100;
     const anomalyScore = Math.random() * 10;
@@ -153,7 +185,32 @@ const ResultsVisualization = ({ data }) => {
 
   const results = parseAnalysisResults(data);
 
-  const metrics = [
+  const metrics = results.jsonData ? [
+    {
+      icon: Target,
+      label: 'Total Systems',
+      value: results.jsonData.summary_metrics.total_systems_analyzed,
+      color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    },
+    {
+      icon: TrendingUp,
+      label: 'Confirmed Exoplanets',
+      value: results.jsonData.summary_metrics.confirmed_exoplanets,
+      color: 'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)'
+    },
+    {
+      icon: Zap,
+      label: 'Candidates',
+      value: results.jsonData.summary_metrics.planetary_candidates,
+      color: 'linear-gradient(135deg, #ffc107 0%, #ff8f00 100%)'
+    },
+    {
+      icon: AlertCircle,
+      label: 'False Positives',
+      value: results.jsonData.summary_metrics.false_positives,
+      color: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)'
+    }
+  ] : [
     {
       icon: Target,
       label: 'Detection Result',
@@ -182,12 +239,16 @@ const ResultsVisualization = ({ data }) => {
     }
   ];
 
-  const pieData = [
+  const pieData = results.jsonData ? [
+    { name: 'Confirmed', value: results.jsonData.discovery_statistics.confirmed_percentage * 100 },
+    { name: 'Candidates', value: results.jsonData.discovery_statistics.candidate_percentage * 100 },
+    { name: 'False Positives', value: results.jsonData.discovery_statistics.false_positive_percentage * 100 }
+  ] : [
     { name: 'Signal', value: parseFloat(results.signalStrength) },
     { name: 'Noise', value: 100 - parseFloat(results.signalStrength) }
   ];
 
-  const pieColors = ['#667eea', '#ff6b6b'];
+  const pieColors = results.jsonData ? ['#4ecdc4', '#ffc107', '#ff6b6b'] : ['#667eea', '#ff6b6b'];
 
   const CustomPieTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -232,12 +293,14 @@ const ResultsVisualization = ({ data }) => {
           </AlertIcon>
           <AlertText>
             <strong>
-              {results.hasExoplanet ? 'Exoplanet Detected!' : 'No Exoplanet Detected'}
+              {results.hasExoplanet ? 'Exoplanets Detected!' : 'No Exoplanets Detected'}
             </strong>
             <br />
-            {results.hasExoplanet
-              ? `Analysis indicates a ${results.confidence}% probability of exoplanet presence based on the stellar data patterns.`
-              : `The vector analysis shows patterns consistent with stellar noise rather than exoplanet signals.`
+            {results.jsonData && results.jsonData.recommendations
+              ? results.jsonData.recommendations.notes
+              : results.hasExoplanet
+                ? `Analysis indicates a ${results.confidence}% probability of exoplanet presence based on the stellar data patterns.`
+                : `The vector analysis shows patterns consistent with stellar noise rather than exoplanet signals.`
             }
           </AlertText>
         </AlertContent>
@@ -262,7 +325,7 @@ const ResultsVisualization = ({ data }) => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
         <ChartSection>
-          <ChartTitle>Signal vs Noise Distribution</ChartTitle>
+          <ChartTitle>{results.jsonData ? 'Classification Distribution' : 'Signal vs Noise Distribution'}</ChartTitle>
           <ChartContainer>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -286,7 +349,7 @@ const ResultsVisualization = ({ data }) => {
         </ChartSection>
 
         <ChartSection>
-          <ChartTitle>Vector Segment Analysis</ChartTitle>
+          <ChartTitle>{results.jsonData ? 'System Classification Confidence' : 'Vector Segment Analysis'}</ChartTitle>
           <ChartContainer>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={results.vectorAnalysis.slice(0, 10)}>
@@ -308,6 +371,30 @@ const ResultsVisualization = ({ data }) => {
           </ChartContainer>
         </ChartSection>
       </div>
+
+      {results.jsonData && results.jsonData.recommendations && (
+        <ChartSection>
+          <ChartTitle>Analysis Summary & Recommendations</ChartTitle>
+          <ChartContainer>
+            <div style={{ color: 'white', lineHeight: '1.6' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <strong>Priority Level:</strong> {results.jsonData.recommendations.priority_level}
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <strong>Follow-up Required:</strong> {results.jsonData.recommendations.follow_up_required ? 'Yes' : 'No'}
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <strong>Model Performance:</strong><br />
+                {results.jsonData.model_performance.reliability_assessment}
+              </div>
+              <div>
+                <strong>Data Quality:</strong><br />
+                {results.jsonData.data_quality.notes}
+              </div>
+            </div>
+          </ChartContainer>
+        </ChartSection>
+      )}
     </VisualizationContainer>
   );
 };

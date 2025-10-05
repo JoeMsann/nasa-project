@@ -276,7 +276,9 @@ const ChatInterfaceAdvanced = ({ onAnalysisComplete, initialVector }) => {
 
       // Only trigger analysis complete for actual exoplanet analysis
       if (result.isExoplanetAnalysis) {
-        onAnalysisComplete?.(result.response);
+        // Pass the output_json if available, otherwise fall back to response text
+        const analysisData = result.output_json || result.response;
+        onAnalysisComplete?.(analysisData);
       }
     } catch (error) {
       const errorMessage = {
