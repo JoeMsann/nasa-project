@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Upload, MessageCircle, BarChart3, Sparkles, ArrowRight, Database } from 'lucide-react';
 import FileUploadAdvanced from './FileUploadAdvanced';
 import QuickAnalysis from './QuickAnalysis';
+import PlanetViewer from './PlanetViewer';
 
 const DashboardContainer = styled.div`
   padding: 6rem 2rem 2rem;
@@ -13,8 +14,37 @@ const DashboardContainer = styled.div`
 `;
 
 const Hero = styled(motion.section)`
-  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
   margin-bottom: 4rem;
+  min-height: 500px;
+
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 3rem;
+  }
+`;
+
+const HeroContent = styled.div`
+  text-align: left;
+
+  @media (max-width: 968px) {
+    text-align: center;
+    order: 2;
+  }
+`;
+
+const HeroVisual = styled(motion.div)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media (max-width: 968px) {
+    order: 1;
+  }
 `;
 
 const Title = styled(motion.h1)`
@@ -34,9 +64,14 @@ const Title = styled(motion.h1)`
 const Subtitle = styled(motion.p)`
   font-size: 1.3rem;
   color: rgba(255, 255, 255, 0.8);
-  max-width: 600px;
-  margin: 0 auto 2rem;
+  max-width: 500px;
+  margin: 0 0 2rem 0;
   line-height: 1.6;
+
+  @media (max-width: 968px) {
+    margin: 0 auto 2rem;
+    max-width: 600px;
+  }
 
   @media (max-width: 768px) {
     font-size: 1.1rem;
@@ -166,33 +201,42 @@ const Dashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <Title
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
+        <HeroContent>
+          <Title
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+          >
+            Discover Exoplanets with AI
+          </Title>
+          <Subtitle
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+          >
+            Advanced machine learning analysis of stellar data to detect potential exoplanets
+            in distant star systems with unprecedented accuracy.
+          </Subtitle>
+          <CTAButton
+            onClick={() => navigate('/analysis')}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Sparkles size={20} />
+            Start Analysis
+            <ArrowRight size={20} />
+          </CTAButton>
+        </HeroContent>
+        <HeroVisual
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.8, duration: 1 }}
         >
-          Discover Exoplanets with AI
-        </Title>
-        <Subtitle
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-        >
-          Advanced machine learning analysis of stellar data to detect potential exoplanets
-          in distant star systems with unprecedented accuracy.
-        </Subtitle>
-        <CTAButton
-          onClick={() => navigate('/analysis')}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Sparkles size={20} />
-          Start Analysis
-          <ArrowRight size={20} />
-        </CTAButton>
+          <PlanetViewer />
+        </HeroVisual>
       </Hero>
 
       <FeaturesGrid>
