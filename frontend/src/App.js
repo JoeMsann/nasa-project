@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { MessageProvider } from './hooks/useMessages';
 import Dashboard from './components/Dashboard';
 import AnalysisView from './components/AnalysisView';
+import KeplerDetails from './components/KeplerDetails';
 import Navigation from './components/Navigation';
 import ServicesSidebar from './components/ServicesSidebar';
 
@@ -68,6 +69,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/analysis" element={<AnalysisView />} />
+              <Route path="/kepler/:keplerId" element={<KeplerDetails />} />
             </Routes>
           </MainContent>
         </AppContainer>

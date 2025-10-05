@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Client } from '@gradio/client';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
@@ -137,6 +138,52 @@ export const uploadAndAnalyzeCsv = async (file) => {
       throw new Error('Unable to connect to the server. Please check your connection.');
     } else {
       throw new Error('An unexpected error occurred while processing the file');
+    }
+  }
+};
+
+export const fetchKeplerById = async (keplerId) => {
+  try {
+    console.log('Fetching Kepler data for ID:', keplerId);
+    console.log('Using HF token:', process.env.REACT_APP_HF_TOKEN ? 'Token present' : 'No token');
+
+    // Initialize Gradio client with HF token
+    const client = await Client.connect("chadiawar977/Nasa_space", {
+      hf_token: process.env.REACT_APP_HF_TOKEN
+    });
+
+    console.log('Connected to Gradio client successfully');
+
+    // Call the keplerid endpoint with the Kepler ID
+    const result = await client.predict("/keplerid", {
+      kepler_id: keplerId,
+    });
+
+    console.log('API Response:', result);
+
+    // Return the actual data - check if it's wrapped or direct
+    if (result && result.data) {
+      return result.data;
+    } else if (result) {
+      return result;
+    } else {
+      throw new Error('No data received from API');
+    }
+  } catch (error) {
+    console.error('Kepler API Error Details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+
+    if (error.message.includes('Connection') || error.message.includes('connect')) {
+      throw new Error('Unable to connect to Hugging Face Spaces. Please check your connection.');
+    } else if (error.message.includes('predict')) {
+      throw new Error('Failed to fetch Kepler data from the API');
+    } else if (error.message.includes('token') || error.message.includes('auth')) {
+      throw new Error('Authentication failed. Please check your Hugging Face token.');
+    } else {
+      throw new Error(`API Error: ${error.message}`);
     }
   }
 };
