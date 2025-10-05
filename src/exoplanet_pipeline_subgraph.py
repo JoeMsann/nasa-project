@@ -1,15 +1,14 @@
 from typing import TypedDict
 from config import app_config
 from langgraph.graph import StateGraph, START, END
-from functions import clean_query, choose_model
+from functions import clean_query, choose_model_api
 from prompts import JSON_TRANSCRIBER_PROMPT
 import pandas as pd
 import io
 
 # Initializing models
 vector_parser = app_config.reasoning_model
-kepler = app_config.kepler
-kepler = app_config.kepler
+exoplanet_model = app_config.exoplanet_model
 json_transcriber_agent = app_config.reasoning_model
 
 # Pipeline State
@@ -53,16 +52,16 @@ def exoplanet_detection_node(state: State) -> State:
     output_json_list = []
 
     for vector_str in vector_list:
-        model = choose_model(vector_str)
+        model_api = choose_model_api(vector_str)
 
         # Check if model selection returned an error
-        if isinstance(model, dict) and "error" in model:
-            output_json_list.append(model)
+        if isinstance(model_api, dict) and "error" in model_api:
+            output_json_list.append(model_api)
             continue
 
-        result = model.client.predict(
+        result = exoplanet_model.predict(
             input_vector=vector_str,
-            api_name="/predict"
+            api_name=model_api
         )
         output_json_list.append(result)
     
