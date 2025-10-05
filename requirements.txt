@@ -18,3 +18,5 @@ tqdm
 scikit-learn
 streamlit
 gradio-client
+fastapi
+uvicorn
