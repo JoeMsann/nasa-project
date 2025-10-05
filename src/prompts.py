@@ -62,6 +62,7 @@ Your job is to analyze user queries and classify them into ONE of two categories
 - Analyze Kepler or K2 mission feature vectors or derived parameters
 - Check if specific measurement sets indicate an exoplanet
 - Any task involving numerical stellar data analysis or classification
+- If the use only enters a vector or a series of numbers or a csv with no context
 
 **CONVERSATION** - Route here if the user wants to:
 - Ask general questions about space, astronomy, or exoplanets
