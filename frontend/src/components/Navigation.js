@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Home, Zap, Settings, HelpCircle, Menu } from 'lucide-react';
+import { Home, Zap, Settings, HelpCircle, Menu, Database } from 'lucide-react';
 
 const NavContainer = styled(motion.nav)`
   position: fixed;
@@ -101,6 +101,7 @@ const Navigation = ({ onToggleSidebar }) => {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: Home },
     { path: '/analysis', label: 'Analysis', icon: Zap },
+    { path: '/kepler', label: 'Kepler Data', icon: Database },
   ];
 
   return (

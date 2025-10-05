@@ -31,79 +31,20 @@ export const processMessage = async (userInput, csvData = null) => {
   }
 };
 
-// Helper function to detect if input is a vector
-const isVectorInput = (input) => {
-  // Check if input looks like a vector (array of numbers)
-  const trimmed = input.trim();
-
-  // Simple heuristic: contains brackets and commas with numbers
-  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-    return true;
-  }
-
-  // Or comma-separated numbers
-  const parts = trimmed.split(',');
-  if (parts.length >= 100) { // NASA vectors should have 122 elements
-    const numbersCount = parts.filter(part => {
-      const num = parseFloat(part.trim());
-      return !isNaN(num) && isFinite(num);
-    }).length;
-
-    // If most parts are valid numbers (including scientific notation), likely a vector
-    return numbersCount / parts.length > 0.9;
-  }
-
-  return false;
-};
-
-export const processGeneralMessage = async (userInput) => {
-  try {
-    const response = await api.post('/chat', {
-      user_input: userInput,
-      attached_table: null,
-    });
-
-    return {
-      response: response.data.response,
-      isExoplanetAnalysis: false
-    };
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
-  }
-};
-
-export const processVectorAnalysis = async (vectorInput) => {
-  try {
-    const response = await api.post('/chat', {
-      user_input: vectorInput,
-      attached_table: null,
-    });
-
-    return {
-      response: response.data.response,
-      isExoplanetAnalysis: true
-    };
-  } catch (error) {
-    console.error('Vector Analysis Error:', error);
-    throw error;
-  }
-};
 
 export const processSmartMessage = async (userInput, csvData = null) => {
   try {
-    // Determine if this is vector analysis or general conversation
-    // const isVector = isVectorInput(userInput);
-    const isVector = true
-
     const response = await api.post('/chat', {
       user_input: userInput,
       attached_table: csvData,
     });
 
+    // Check if the API response indicates this is an exoplanet test
+    const isExoplanetTest = response.data.is_exoplanet_text || true;
+
     return {
       response: response.data.response,
-      isExoplanetAnalysis: isVector || (csvData !== null)
+      isExoplanetAnalysis: isExoplanetTest || (csvData !== null)
     };
   } catch (error) {
     console.error('API Error:', error);
@@ -171,6 +112,52 @@ export const fetchKeplerById = async (keplerId) => {
     }
   } catch (error) {
     console.error('Kepler API Error Details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+
+    if (error.message.includes('Connection') || error.message.includes('connect')) {
+      throw new Error('Unable to connect to Hugging Face Spaces. Please check your connection.');
+    } else if (error.message.includes('predict')) {
+      throw new Error('Failed to fetch Kepler data from the API');
+    } else if (error.message.includes('token') || error.message.includes('auth')) {
+      throw new Error('Authentication failed. Please check your Hugging Face token.');
+    } else {
+      throw new Error(`API Error: ${error.message}`);
+    }
+  }
+};
+
+export const fetchKeplerPaginated = async (page = 1, pageSize = 10) => {
+  try {
+    console.log('Fetching paginated Kepler data - Page:', page, 'Size:', pageSize);
+
+    // Initialize Gradio client with HF token
+    const client = await Client.connect("chadiawar977/Nasa_space", {
+      hf_token: process.env.REACT_APP_HF_TOKEN
+    });
+
+    console.log('Connected to Gradio client successfully');
+
+    // Call the kepler_paginated endpoint
+    const result = await client.predict("/kepler_paginated", {
+      page: page,
+      page_size: pageSize,
+    });
+
+    console.log('Paginated API Response:', result);
+
+    // Return the actual data - check if it's wrapped or direct
+    if (result && result.data) {
+      return result.data;
+    } else if (result) {
+      return result;
+    } else {
+      throw new Error('No data received from API');
+    }
+  } catch (error) {
+    console.error('Kepler Paginated API Error Details:', {
       message: error.message,
       stack: error.stack,
       name: error.name

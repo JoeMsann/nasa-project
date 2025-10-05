@@ -50,7 +50,7 @@ def routing_node(state: MainWorkflowState) -> MainWorkflowState:
 
     # Convert routing decision to boolean
     decision_text = routing_decision.content.strip().lower()
-    is_exoplanet = any(keyword in decision_text for keyword in ["exoplanet", "detection", "predict"]) and state.get("attached_table") is not None
+    is_exoplanet = any(keyword in decision_text for keyword in ["exoplanet", "detection", "predict"]) or state.get("attached_table") is not None
 
     # Add current user input to messages
     return {

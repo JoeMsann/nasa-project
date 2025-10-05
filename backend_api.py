@@ -21,12 +21,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class ChatRequest(BaseModel):
     user_input: str
     attached_table: Optional[str] = None
 
+
 class ChatResponse(BaseModel):
     response: str
+    is_exoplanet_text: bool
+
 
 @app.post("/chat", response_model=ChatResponse)
 async def process_chat_message(request: ChatRequest):
@@ -46,7 +50,10 @@ async def process_chat_message(request: ChatRequest):
         result = main_workflow.invoke(state)
 
         if result.get("response"):
-            return ChatResponse(response=result["response"])
+            return ChatResponse(
+                response=result["response"],
+                is_exoplanet_text=result["routing_decision"],
+            )
         else:
             raise HTTPException(
                 status_code=500,
@@ -60,10 +67,12 @@ async def process_chat_message(request: ChatRequest):
 
         raise HTTPException(status_code=500, detail=error_msg)
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "message": "NASA Exoplanet Detection API is running"}
+
 
 @app.get("/")
 async def root():
@@ -77,6 +86,8 @@ async def root():
         }
     }
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
