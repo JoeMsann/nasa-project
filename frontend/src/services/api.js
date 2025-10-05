@@ -19,7 +19,6 @@ export const processMessage = async (userInput, csvData = null) => {
 
     return response.data.response;
   } catch (error) {
-    console.error('API Error:', error);
 
     if (error.response) {
       throw new Error(error.response.data.detail || 'Server error occurred');
@@ -38,7 +37,6 @@ export const processSmartMessage = async (userInput, csvData = null) => {
       user_input: userInput,
       attached_table: csvData,
     });
-    console.log(response)
     // Check if the API response indicates this is an exoplanet test
     const isExoplanetTest = response.data.is_exoplanet_text || true;
 
@@ -48,7 +46,6 @@ export const processSmartMessage = async (userInput, csvData = null) => {
       output_json: response.data.output_json
     };
   } catch (error) {
-    console.error('API Error:', error);
 
     if (error.response) {
       throw new Error(error.response.data.detail || 'Server error occurred');
@@ -72,7 +69,6 @@ const text = await file.text();
 
     return response.data.response;
   } catch (error) {
-    console.error('CSV Upload Error:', error);
 
     if (error.response) {
       throw new Error(error.response.data.detail || 'Failed to analyze CSV file');
@@ -86,22 +82,16 @@ const text = await file.text();
 
 export const fetchKeplerById = async (keplerId) => {
   try {
-    console.log('Fetching Kepler data for ID:', keplerId);
-    console.log('Using HF token:', process.env.REACT_APP_HF_TOKEN ? 'Token present' : 'No token');
 
     // Initialize Gradio client with HF token
     const client = await Client.connect("chadiawar977/Nasa_space", {
       hf_token: process.env.REACT_APP_HF_TOKEN
     });
 
-    console.log('Connected to Gradio client successfully');
-
     // Call the keplerid endpoint with the Kepler ID
     const result = await client.predict("/keplerid", {
       kepler_id: keplerId,
     });
-
-    console.log('API Response:', result);
 
     // Return the actual data - check if it's wrapped or direct
     if (result && result.data) {
@@ -112,12 +102,6 @@ export const fetchKeplerById = async (keplerId) => {
       throw new Error('No data received from API');
     }
   } catch (error) {
-    console.error('Kepler API Error Details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
-
     if (error.message.includes('Connection') || error.message.includes('connect')) {
       throw new Error('Unable to connect to Hugging Face Spaces. Please check your connection.');
     } else if (error.message.includes('predict')) {
@@ -132,22 +116,17 @@ export const fetchKeplerById = async (keplerId) => {
 
 export const fetchKeplerPaginated = async (page = 1, pageSize = 10) => {
   try {
-    console.log('Fetching paginated Kepler data - Page:', page, 'Size:', pageSize);
 
     // Initialize Gradio client with HF token
     const client = await Client.connect("chadiawar977/Nasa_space", {
       hf_token: process.env.REACT_APP_HF_TOKEN
     });
 
-    console.log('Connected to Gradio client successfully');
-
     // Call the kepler_paginated endpoint
     const result = await client.predict("/kepler_paginated", {
       page: page,
       page_size: pageSize,
     });
-
-    console.log('Paginated API Response:', result);
 
     // Return the actual data - check if it's wrapped or direct
     if (result && result.data) {
@@ -158,12 +137,6 @@ export const fetchKeplerPaginated = async (page = 1, pageSize = 10) => {
       throw new Error('No data received from API');
     }
   } catch (error) {
-    console.error('Kepler Paginated API Error Details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
-
     if (error.message.includes('Connection') || error.message.includes('connect')) {
       throw new Error('Unable to connect to Hugging Face Spaces. Please check your connection.');
     } else if (error.message.includes('predict')) {
