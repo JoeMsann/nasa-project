@@ -1,9 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Union
 import sys
 import os
+import json
 
 # Add src directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
@@ -30,6 +31,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     is_exoplanet_text: bool
+    output_json: Optional[Union[dict, list[dict]]] = None
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -50,9 +52,22 @@ async def process_chat_message(request: ChatRequest):
         result = main_workflow.invoke(state)
 
         if result.get("response"):
+            # Parse output_json if it's a string
+            output_json = result.get("output_json")
+            if output_json and isinstance(output_json, str):
+                try:
+                    # Remove markdown code block formatting if present
+                    if output_json.startswith("```json"):
+                        output_json = output_json.replace("```json", "").replace("```", "").strip()
+                    output_json = json.loads(output_json)
+                except json.JSONDecodeError:
+                    # If parsing fails, set to None
+                    output_json = None
+
             return ChatResponse(
                 response=result["response"],
                 is_exoplanet_text=result["routing_decision"],
+                output_json=output_json
             )
         else:
             raise HTTPException(

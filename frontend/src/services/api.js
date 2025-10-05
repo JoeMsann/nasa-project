@@ -38,13 +38,14 @@ export const processSmartMessage = async (userInput, csvData = null) => {
       user_input: userInput,
       attached_table: csvData,
     });
-
+    console.log(response)
     // Check if the API response indicates this is an exoplanet test
     const isExoplanetTest = response.data.is_exoplanet_text || true;
 
     return {
       response: response.data.response,
-      isExoplanetAnalysis: isExoplanetTest || (csvData !== null)
+      isExoplanetAnalysis: isExoplanetTest || (csvData !== null),
+      output_json: response.data.output_json
     };
   } catch (error) {
     console.error('API Error:', error);
@@ -61,7 +62,7 @@ export const processSmartMessage = async (userInput, csvData = null) => {
 
 export const uploadAndAnalyzeCsv = async (file) => {
   try {
-    const text = await file.text();
+const text = await file.text();
     const fileName = file.name;
 
     const response = await api.post('/chat', {
