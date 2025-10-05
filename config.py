@@ -1,5 +1,4 @@
 import os
-from dataclasses import dataclass
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from gradio_client import Client
@@ -16,6 +15,8 @@ class Config:
         self.groq_api_key: str = os.getenv("GROQ_API_KEY")
         self.langsmith_api_key: str = os.getenv("LANGSMITH_API_KEY")
         self.hf_token: str = os.getenv("HF_TOKEN")
+        self.kepler_api_name = "/predict_kepler"
+        self.k2_api_name = "/predict_k2"
         
         # Initialize models
         # Routing - GPT OSS 20b
@@ -24,14 +25,12 @@ class Config:
             api_key=self.groq_api_key
         )
         self.kepler_vector_size = 122
-        self.kepler_api_name = "/predict_kepler"
-        self.k2_api_name = "/predict_k2"
         self.k2_vector_size = 221
 
         # Exoplanet Detection Model
         self.exoplanet_model = Client(
-            url="chadiawar977/Nasa_space",
-            hf_token=self.hf_token,
+            "chadiawar977/Nasa_space",
+            self.hf_token,
         )
 
         # Conversation - Kimi K2 Instruct
